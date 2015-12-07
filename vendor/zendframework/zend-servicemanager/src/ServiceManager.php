@@ -461,21 +461,23 @@ class ServiceManager implements ServiceLocatorInterface
      * @param  string $cName The canonical name to resolve
      * @return string The resolved canonical name
      */
-    protected function resolveAlias($cName)
+    protected function resolveAlias ($cName)
     {
         $stack = array();
 
-        while ($this->hasAlias($cName)) {
-            if (isset($stack[$cName])) {
-                throw new Exception\CircularReferenceException(sprintf(
+        while ($this->hasAlias ( $cName )) {
+            if ( isset( $stack[ $cName ] ) ) {
+                throw new Exception\CircularReferenceException(
+                  sprintf (
                     'Circular alias reference: %s -> %s',
-                    implode(' -> ', $stack),
+                    implode ( ' -> ', $stack ),
                     $cName
-                ));
+                  )
+                );
             }
 
-            $stack[$cName] = $cName;
-            $cName = $this->aliases[$cName];
+            $stack[ $cName ] = $cName;
+            $cName = $this->aliases[ $cName ];
         }
 
         return $cName;
