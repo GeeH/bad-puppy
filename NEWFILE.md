@@ -1,1 +1,0 @@
-YouTrack is really cool!
