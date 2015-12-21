@@ -1,1 +1,0 @@
-Hot water is heavier than cold water.
