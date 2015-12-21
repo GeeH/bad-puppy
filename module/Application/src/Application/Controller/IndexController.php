@@ -10,8 +10,6 @@
 namespace Application\Controller;
 
 use Application\Service\DataService;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\Filter\Int;
 use Zend\Filter\StaticFilter;
 use Zend\Filter\ToInt;
 use Zend\I18n\Filter\Alpha;
@@ -48,17 +46,17 @@ class IndexController extends AbstractActionController
         );
 
         $country = $this->dataService->getCountryByCode($code);
-        if (is_null($country)) {
+        if ( is_null($country) ) {
             throw new \Exception('No Country Found for code ' . $code);
         }
 
         $cities = $this->dataService->getCitiesByCountryCode($code);
 
         return new ViewModel(
-            [
-                'country' => $country,
-                'cities' => $cities,
-            ]
+          [
+            'country' => $country,
+            'cities' => $cities,
+          ]
         );
 
     }
@@ -67,22 +65,22 @@ class IndexController extends AbstractActionController
     {
         $id = StaticFilter::execute(
           $this->params()->fromRoute('id'),
-            ToInt::class
+          ToInt::class
         );
 
         $city = $this->dataService->getCityById($id);
 
-        if (is_null($city)) {
+        if ( is_null($city) ) {
             throw new \Exception('No City found with ID ' . $id);
         }
 
         $country = $this->dataService->getCountryByCode($city['CountryCode']);
 
         return new ViewModel(
-            [
-                'city' => $city,
-                'country' => $country,
-            ]
+          [
+            'city' => $city,
+            'country' => $country,
+          ]
         );
     }
 }
