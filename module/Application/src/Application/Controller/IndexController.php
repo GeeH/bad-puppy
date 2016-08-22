@@ -9,71 +9,73 @@
 
 namespace Application\Controller;
 
-use Zend\Db\TableGateway\TableGateway;
+use Application\Service\WorldService;
+use Zend\Db\Adapter\Adapter;
+use Zend\Filter\StaticFilter;
+use Zend\Filter\ToInt;
+use Zend\I18n\Filter\Alpha;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
 
-// module/Application/src/Application/Controller/IndexController.php
 class IndexController extends AbstractActionController
 {
+
+    /**
+     * @var WorldService
+     */
+    private $worldService;
+
+    /**
+     * IndexController constructor.
+     * @param Adapter $worldService
+     */
+    public function __construct(WorldService $worldService)
+    {
+        $this->worldService = $worldService;
+    }
+
     public function indexAction()
     {
-        $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-        $tableGateway = new TableGateway('Country', $adapter);
-        $countries = $tableGateway->select()->toArray();
+        $countries = $this->worldService->getAllCountries();
         return new ViewModel(['countries' => $countries]);
     }
 
     public function countryAction()
     {
-        $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-        $tableGateway = new TableGateway('Country', $adapter);
+        $code = StaticFilter::execute($this->params()->fromRoute('code'), Alpha::class);
+        $country = $this->worldService->getCountryByCode($code);
 
-        $code = $this->params()->fromRoute('code');
-
-        $country = $tableGateway->select(['Code' => $code])->toArray();
-        if (count($country) < 1) {
+        if (!$country) {
             throw new \Exception('No Country Found for code ' . $code);
         }
 
-        $cityTableGateway = new TableGateway('City', $adapter);
-        $cities = $cityTableGateway->select(['CountryCode' => $code])->toArray();
-
+        $cities = $this->worldService->getCitiesByCountryCode($code);
         return new ViewModel(
-            [
-                'country' => $country[0],
-                'cities' => $cities,
-            ]
+          [
+            'country' => $country,
+            'cities' => $cities,
+          ]
         );
 
     }
 
     public function cityAction()
     {
-        $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $id = StaticFilter::execute($this->params()->fromRoute('id'), ToInt::class);
+        $city = $this->worldService->getCityById($id);
 
-        $id = $this->params()->fromRoute('id');
-
-        $cityTableGateway = new TableGateway('City', $adapter);
-        $city = $cityTableGateway->select(['ID' => $id])->toArray();
-
-        $tableGateway = new TableGateway('Country', $adapter);
-
-        if (count($city) < 0) {
+        if (!$city) {
             throw new \Exception('No City found with ID ' . $id);
         }
 
-        $city = $city[0];
-
-        $country = $tableGateway->select(['Code' => $city['CountryCode']])->toArray();
-        $country = $country[0];
+        $country = $this->worldService->getCountryByCode($city->getCountryCode());
 
         return new ViewModel(
-            [
-                'city' => $city,
-                'country' => $country,
-            ]
+          [
+            'city' => $city,
+            'country' => $country,
+          ]
         );
     }
 }
