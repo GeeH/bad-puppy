@@ -23,10 +23,6 @@ class ComposerAutoloaderInit42e18fb47bf62b7452afb0b92dfae8ab
         self::$loader = $loader = new \Composer\Autoload\ClassLoader();
         spl_autoload_unregister(array('ComposerAutoloaderInit42e18fb47bf62b7452afb0b92dfae8ab', 'loadClassLoader'));
 
-        $includePaths = require __DIR__ . '/include_paths.php';
-        array_push($includePaths, get_include_path());
-        set_include_path(join(PATH_SEPARATOR, $includePaths));
-
         $map = require __DIR__ . '/autoload_namespaces.php';
         foreach ($map as $namespace => $path) {
             $loader->set($namespace, $path);
@@ -44,11 +40,20 @@ class ComposerAutoloaderInit42e18fb47bf62b7452afb0b92dfae8ab
 
         $loader->register(true);
 
+        $includeFiles = require __DIR__ . '/autoload_files.php';
+        foreach ($includeFiles as $fileIdentifier => $file) {
+            composerRequire42e18fb47bf62b7452afb0b92dfae8ab($fileIdentifier, $file);
+        }
+
         return $loader;
     }
 }
 
-function composerRequire42e18fb47bf62b7452afb0b92dfae8ab($file)
+function composerRequire42e18fb47bf62b7452afb0b92dfae8ab($fileIdentifier, $file)
 {
-    require $file;
+    if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
+        require $file;
+
+        $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
+    }
 }
