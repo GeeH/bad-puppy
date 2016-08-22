@@ -45,7 +45,7 @@ class IndexController extends AbstractActionController
           Alpha::class
         );
 
-        $country = $this->dataService->getCountryByCode($code);
+        $country = $this->dataService->getCountryByCode($codes);
         if ( is_null($country) ) {
             throw new \Exception('No Country Found for code ' . $code);
         }
