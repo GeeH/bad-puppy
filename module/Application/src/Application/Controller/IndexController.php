@@ -50,11 +50,13 @@ class IndexController extends AbstractActionController
             throw new \Exception('No Country Found for code ' . $code);
         }
 
+        $something = 'nothing';
+
         $cities = $this->worldService->getCitiesByCountryCode($code);
         return new ViewModel(
           [
             'country' => $country,
-            'cities' => $citiesx,
+            'cities' => $cities,
           ]
         );
 
