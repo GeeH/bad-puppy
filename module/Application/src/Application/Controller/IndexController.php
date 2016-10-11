@@ -52,6 +52,8 @@ class IndexController extends AbstractActionController
 
         $something = 'nothing';
 
+        $angri = 'angry';
+
         $cities = $this->worldService->getCitiesByCountryCode($code);
         return new ViewModel(
           [
