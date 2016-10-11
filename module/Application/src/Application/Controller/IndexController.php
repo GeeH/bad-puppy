@@ -9,7 +9,8 @@
 
 namespace Application\Controller;
 
-use Application\Service\DataService;
+use Application\Service\WorldService;
+use Zend\Db\Adapter\Adapter;
 use Zend\Filter\StaticFilter;
 use Zend\Filter\ToInt;
 use Zend\I18n\Filter\Alpha;
@@ -17,41 +18,39 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
 
-// module/Application/src/Application/Controller/IndexController.php
 class IndexController extends AbstractActionController
 {
 
     /**
-     * @var DataService
+     * @var WorldService
      */
-    private $dataService;
+    private $worldService;
 
-    public function __construct(DataService $dataService)
+    /**
+     * IndexController constructor.
+     * @param Adapter $worldService
+     */
+    public function __construct(WorldService $worldService)
     {
-        $this->dataService = $dataService;
+        $this->worldService = $worldService;
     }
 
     public function indexAction()
     {
-        $countries = $this->dataService->getAllCountries();
+        $countries = $this->worldService->getAllCountries();
         return new ViewModel(['countries' => $countries]);
     }
 
     public function countryAction()
     {
+        $code = StaticFilter::execute($this->params()->fromRoute('code'), Alpha::class);
+        $country = $this->worldService->getCountryByCode($code);
 
-        $code = StaticFilter::execute(
-          $this->params()->fromRoute('code'),
-          Alpha::class
-        );
-
-        $country = $this->dataService->getCountryByCode($code);
-        if ( is_null($country) ) {
+        if (!$country) {
             throw new \Exception('No Country Found for code ' . $code);
         }
 
-        $cities = $this->dataService->getCitiesByCountryCode($code);
-
+        $cities = $this->worldService->getCitiesByCountryCode($code);
         return new ViewModel(
           [
             'country' => $country,
@@ -63,18 +62,14 @@ class IndexController extends AbstractActionController
 
     public function cityAction()
     {
-        $id = StaticFilter::execute(
-          $this->params()->fromRoute('id'),
-          ToInt::class
-        );
+        $id = StaticFilter::execute($this->params()->fromRoute('id'), ToInt::class);
+        $city = $this->worldService->getCityById($id);
 
-        $city = $this->dataService->getCityById($id);
-
-        if ( is_null($city) ) {
+        if (!$city) {
             throw new \Exception('No City found with ID ' . $id);
         }
 
-        $country = $this->dataService->getCountryByCode($city['CountryCode']);
+        $country = $this->worldService->getCountryByCode($city->getCountryCode());
 
         return new ViewModel(
           [

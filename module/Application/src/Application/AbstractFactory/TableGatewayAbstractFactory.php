@@ -2,19 +2,18 @@
 /**
  * Created by PhpStorm.
  * User: GeeH
- * Date: 19/10/2015
- * Time: 18:03
+ * Date: 15/10/2015
+ * Time: 11:43
  */
 
 namespace Application\AbstractFactory;
 
 
 use Zend\Db\Adapter\Adapter;
-use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\Mvc\Application;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\Stdlib\Hydrator\ClassMethods;
 
 class TableGatewayAbstractFactory implements AbstractFactoryInterface
 {
@@ -27,8 +26,11 @@ class TableGatewayAbstractFactory implements AbstractFactoryInterface
      * @param $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
+    public function canCreateServiceWithName(
+      ServiceLocatorInterface $serviceLocator,
+      $name,
+      $requestedName
+    ) {
         return fnmatch('*Table', $requestedName);
     }
 
@@ -40,18 +42,17 @@ class TableGatewayAbstractFactory implements AbstractFactoryInterface
      * @param $requestedName
      * @return mixed
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        $tableName = str_replace('Table', '', $requestedName);
-        $adapter = $serviceLocator->get(Adapter::class);
+    public function createServiceWithName(
+      ServiceLocatorInterface $serviceLocator,
+      $name,
+      $requestedName
+    ) {
+        $extractedName = ucfirst(str_replace('Table', '', $requestedName));
+        $objectName = '\Application\Entity\\' . $extractedName;
+        $hydrator           = new \Zend\Stdlib\Hydrator\ClassMethods();
+        $rowObjectPrototype = new $objectName;
+        $resultSet          = new \Zend\Db\ResultSet\HydratingResultSet($hydrator, $rowObjectPrototype);
 
-        $hydrator = new ClassMethods();
-        $entityName = 'Application\Entities\\' . $tableName;
-
-        $objectPrototype = new $entityName;
-
-        $resultSet = new HydratingResultSet($hydrator, $objectPrototype);
-
-        return new TableGateway($tableName, $adapter, null, $resultSet);
+        return new TableGateway($extractedName, $serviceLocator->get(Adapter::class), null, $resultSet);
     }
 }

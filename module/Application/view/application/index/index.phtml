@@ -1,6 +1,8 @@
 <ul>
 <?php
-foreach ($countries as $country): ?>
-    <li><?= $this->countryName($country); ?></li>
+foreach ($countries as $country):  ?>
+    <li>
+        <?= $this->CountryAnchor($country); ?>
+    </li>
 <?php endforeach; ?>
 </ul>

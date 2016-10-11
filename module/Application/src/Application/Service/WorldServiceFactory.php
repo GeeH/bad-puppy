@@ -3,18 +3,18 @@
  * Created by PhpStorm.
  * User: GeeH
  * Date: 16/10/2015
- * Time: 11:24
+ * Time: 11:28
  */
 
-namespace Application\Controller;
+namespace Application\Service;
 
 
-use Application\Service\WorldService;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class IndexControllerFactory implements FactoryInterface
+class WorldServiceFactory implements FactoryInterface
 {
+
 
     /**
      * Create service
@@ -24,7 +24,9 @@ class IndexControllerFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $worldService = $serviceLocator->getServiceLocator()->get(WorldService::class);
-        return new IndexController($worldService);
+        $countryTable = $serviceLocator->get('CountryTable');
+        $cityTable = $serviceLocator->get('CityTable');
+
+        return new WorldService($countryTable, $cityTable);
     }
 }
