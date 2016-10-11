@@ -28,7 +28,7 @@ class IndexController extends AbstractActionController
 
     /**
      * IndexController constructor.
-     * @param Adapter $worldService
+     * @param WorldService $worldService
      */
     public function __construct(WorldService $worldService)
     {
@@ -54,7 +54,7 @@ class IndexController extends AbstractActionController
         return new ViewModel(
           [
             'country' => $country,
-            'cities' => $cities,
+            'cities' => $citiesx,
           ]
         );
 
